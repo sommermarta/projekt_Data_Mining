@@ -1,0 +1,225 @@
+\chapter{Metoda SVM}
+\thispagestyle{fancy}
+
+\section{Dopasowanie modelu i predykcja}
+
+Dopasujmy model SVM do naszych danych na zbiorze treningowym (przyjmuj±c domy¶lne parametry i j±dro radialne):
+
+<<>>=
+mod_svm1 <- svm(class~., data=Train, type="C", kernel="radial",
+               probability=TRUE)
+@
+
+Zróbmy predykcjê na zbiorze testowym:
+
+<<>>=
+pred1 <- predict(mod_svm1, Test, probability=TRUE)
+pred_praw1 <- attr(pred1,"probabilities")[,2]
+pred_klas1 <- predict(mod_svm1, Test)
+@
+
+\section{Diagnostyka modelu}
+
+Tabela reklasyfikacji na zbiorze testowym wygl±da nastêpuj±co:
+
+<<echo=FALSE>>=
+tab1 <- tabela(pred_klas1,Test$class)
+tab1 
+@
+
+Nasz model zakwalifikowa³ wszystkie obserwacje jako zera! Nie mo¿emy wiêc tu mówiæ o dobrym klasyfikatorze. Mimo wszystko spójrzmy jeszcze, jak wygl±da procent poprawnego dopasowania, czu³o¶æ i precyzja:
+
+<<>>=
+procent(tab1)
+czulosc(tab1)
+precyzja(tab1)
+@
+
+Czu³o¶æ i precyzja s± równe zero, czyli rzeczywi¶cie ju¿ gorzej byæ nie mo¿e.
+
+\section{Krzywa ROC i wspó³czynnik AUC}
+
+I na koniec wyznaczmy krzyw± ROC:
+
+<<echo=FALSE,fig.align='center',fig.height=6, fig.width=10>>=
+roc(pred_praw1,Test$class)
+@
+
+Wspó³czynnik AUC wynosi:
+
+<<echo=FALSE>>=
+auc(pred_praw1,Test$class)
+@
+
+Krzywa ROC i wspó³czynnik AUC sugeruj±, ¿e model jest gorszy, ni¿ gdyby¶my robili klasyfikacjê zupe³nie losowo!
+
+\bigskip
+
+\section{Wybór optymalenych parametrów modelu}
+
+Spróbujmy wiêc jako¶ poprawiæ jako¶æ dopasowania. Korzystaj±c z funkcji \texttt{tune()} wyznaczmy optymalne parametry modelu:
+
+<<echo=FALSE>>=
+obj <- tune(svm, class~., data = Train, 
+            ranges = list(gamma = 2^(-1:1), cost = 2^(1:4)),
+            tunecontrol = tune.control(sampling = "cross")
+)
+obj$best.parameters
+@
+
+Dopasujmy teraz nowy model SVM, tym razem z optymalnymi parametrami i zróbmy predykcjê:
+
+<<>>=
+mod_svm2 <- svm(class~., data=Train, type="C", kernel="radial",
+                gamma=obj$best.parameters[1], cost=obj$best.parameters[2],
+                probability=TRUE)
+pred2 <- predict(mod_svm2, Test, probability=TRUE)
+pred_praw2 <- attr(pred2,"probabilities")[,2]
+pred_klas2 <- predict(mod_svm2, Test)
+@ 
+
+Tabela reklasyfikacji wygl±da nastêpuj±co:
+
+<<echo=FALSE>>=
+tab2 <- tabela(pred_klas2,Test$class)
+tab2
+@
+
+Widaæ, ¿e jest ju¿ lepiej. Sprawd¼my, czy poprawi³y siê czu³o¶æ i precyzja:
+
+<<>>=
+procent(tab2)
+czulosc(tab2)
+precyzja(tab2)
+@
+
+Jest zdecydowanie lepiej, ale nadal ¼le. Spójrzmy na krzyw± ROC i parametr AUC:
+
+<<echo=FALSE,fig.align='center',fig.height=6, fig.width=10>>=
+roc(pred_praw2,Test$class)
+auc(pred_praw2,Test$class)
+@
+
+Spróbujmy wiêc dopasowaæ modele SVM u¿ywaj±c ró¿nych funkcji j±drowych.
+
+\section{Modele SVM z ró¿nymi funkcjami j±drowymi}
+
+\subsection{J±dro liniowe}
+
+Dopasowanie modelu i predykcja:
+
+<<>>=
+mod_svm3 <- svm(class~., data=Train, type="C", kernel="linear", 
+                gamma=obj$best.parameters[1], cost=obj$best.parameters[2], 
+                probability=TRUE)
+pred3 <- predict(mod_svm3, Test, probability=TRUE)
+pred_praw3 <- attr(pred3,"probabilities")[,2]
+pred_klas3 <- predict(mod_svm3, Test)
+@
+
+Tabela reklasyfikacji:
+
+<<echo=FALSE>>=
+tab3 <- tabela(pred_klas3,Test$class)
+tab3                
+@
+
+I znów wszystko jest klasyfikowane jako zera... Popatrzmy na czu³o¶æ, precyzjê i procent poprawnego dopasowania:
+
+<<>>=
+procent(tab3)
+czulosc(tab3)
+precyzja(tab3)
+@
+
+Wychodz± równe zero, wiêc model jest fatalny. Mimo to krzywa ROC i parametr AUC tego nie potwierdzaj±:
+
+<<echo=FALSE,fig.align='center',fig.height=6, fig.width=10>>=
+roc(pred_praw3,Test$class)
+auc(pred_praw3,Test$class)
+@
+
+\subsection{J±dro wielomianowe}
+
+Dopasujmy model i zróbmy predykcjê:
+
+<<>>=
+mod_svm4 <- svm(class~., data=Train, type="C", kernel="polynomial", 
+                gamma=obj$best.parameters[1], cost=obj$best.parameters[2], 
+                probability=TRUE)
+pred4 <- predict(mod_svm4, Test, probability=TRUE)
+pred_praw4 <- attr(pred4,"probabilities")[,2]
+pred_klas4 <- predict(mod_svm4, Test)
+@
+
+Przyjrzyjmy siê tabeli reklasyfikacji:
+
+<<echo=FALSE>>=
+tab4 <- tabela(pred_klas4,Test$class)
+tab4  
+@
+
+A tak wygl±daj± czu³o¶æ, precyzja i procent poprawnej klasyfikacji:
+
+<<>>=
+procent(tab4)
+czulosc(tab4)
+precyzja(tab4)
+@
+
+Jest du¿o lepiej. Spójrzmy jeszcze na krzyw± ROC i AUC:
+
+<<echo=FALSE,fig.align='center',fig.height=6, fig.width=10>>=
+roc(pred_praw4,Test$class)
+auc(pred_praw4,Test$class)
+@
+
+\subsection{J±dro sigmoidalne}
+
+Dopasujmy model i zróbmy predykcjê:
+
+<<>>=
+mod_svm5 <- svm(class~., data=Train, type="C", kernel="sigmoid", 
+                gamma=obj$best.parameters[1], cost=obj$best.parameters[2], 
+                probability=TRUE)
+pred5 <- predict(mod_svm5, Test, probability=TRUE)
+pred_praw5 <- attr(pred5,"probabilities")[,2]
+pred_klas5 <- predict(mod_svm5, Test)
+@
+
+Przyjrzyjmy siê tabeli reklasyfikacji:
+
+<<echo=FALSE>>=
+tab5 <- tabela(pred_klas5,Test$class)
+tab5   
+@
+
+A tak wygl±daj± czu³o¶æ, precyzja i procent poprawnej klasyfikacji:
+
+<<>>=
+procent(tab5)
+czulosc(tab5)
+precyzja(tab5)
+@
+
+Jest s³abiej ni¿ w wielomianowym. Spójrzmy jeszcze na krzyw± ROC i AUC:
+
+<<echo=FALSE,fig.align='center',fig.height=6, fig.width=10>>=
+roc(pred_praw5,Test$class)
+auc(pred_praw5,Test$class)
+@
+
+Wygl±da na to, ¿e najlepszy okaza³ siê model SVM z j±drem wielomianowym. Ten te¿ zatem bêdziemy analizowaæ przy porównaniu wszystkich metod.
+
+<<echo=FALSE>>=
+svm_ost <- vector("list",6)
+names(svm_ost) <- c("tabela", "procent", "czulosc", "precyzja", "roc", "auc")
+svm_ost$tabela <- tab4
+svm_ost$procent <- procent(tab4)
+svm_ost$czulosc <- czulosc(tab4)
+svm_ost$precyzja <- precyzja(tab4)
+svm_ost$roc <- list(pred_praw4, Test$class) 
+svm_ost$auc <- auc(pred_praw4,Test$class)
+@
+
+

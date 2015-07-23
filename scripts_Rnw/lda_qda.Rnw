@@ -1,0 +1,167 @@
+\chapter{Analiza dyskryminacyjna}
+\thispagestyle{fancy}
+
+\section{Liniowa - LDA}
+
+\subsection{Dopasowanie modelu i predykcja}
+
+Dopasujmy model LDA do naszych danych na zbiorze treningowym:
+
+<<>>=
+mod_lda <- lda(class~., data=Train)
+@
+
+Zróbmy predykcjê na zbiorze testowym:
+
+<<>>=
+pred_klas <- predict(mod_lda, newdata=Test)$class
+pred_praw <- predict(mod_lda, newdata=Test)$posterior[,2]
+@
+
+\subsection{Diagnostyka modelu}
+
+Tabela reklasyfikacji na zbiorze testowym wygl±da nastêpuj±co:
+
+<<echo=FALSE>>=
+tab <- tabela(pred_klas, Test$class)
+tab 
+@
+
+A procent poprawnego dopasowania, czu³o¶æ i precyzja nastêpuj±co:
+
+<<>>=
+procent(tab)
+czulosc(tab)
+precyzja(tab)
+@
+
+Mimo ¿e procent poprawnej klasyfikacji jest bardzo wysoki (ponad $92\%$), to nie mo¿emy tu mówiæ o dobrym klasyfikatorze. Wyra¼nie widaæ, ¿e nasza LDA klasyfikuje prawie wszystkie obserwacje jako $0$, a przez fakt, ¿e próba nie jest symetryczna (zera stanowi± znaczn± wiêkszo¶æ próby) osi±gamy wysoki procent poprawnej klasyfikacji. O tym, ¿e rzeczywi¶cie model nie jest najlepszy powiedz± nam równie¿ czu³o¶æ ($25\%$) i precyzja ($12\%$).
+
+\subsection{Kroswalidacja}
+
+Sprawd¼my jeszcze jako¶æ dopasowanego modelu przeprowadzaj±c kroswalidacjê dziesiêtnokrotn±. Oto otrzymane rezultaty:
+
+<<cache=TRUE, echo=FALSE>>=
+n <- nrow(se_wyb)
+s <- sample(1:n,n)
+dane <- se_wyb[s,]
+ile <- floor(n/10)
+ile_ost <- ile+ (n-10*ile)
+
+pro <- numeric(10)
+czu <- numeric(10)
+pre <- numeric(10)
+
+for(i in 1:10){
+   
+   if(i != 10){
+      co <- ((i-1)*ile+1):(i*ile)
+   } else{
+      co <- (n-ile_ost+1):n
+   }
+   
+   mod <- lda(class~., data=dane[-co,])
+   pr <- predict(mod, newdata=dane[co,])$class
+      
+   t <- tabela(pr,dane[co,]$class)
+   pro[i] <- procent(t)
+   czu[i] <- czulosc(t)
+   pre[i] <- precyzja(t)
+   
+}
+@
+
+<<>>=
+mean(pro)   # procent poprawnej klasyfikacji
+mean(czu)   # czulosc
+mean(pre)   # precyzja
+@
+
+Czu³o¶æ i precyzja nieco siê poprawi³y. 
+
+\subsection{Krzywa ROC i wspó³czynnik AUC}
+
+I na koniec wyznaczmy krzyw± ROC:
+
+<<echo=FALSE,fig.align='center',fig.height=6, fig.width=10>>=
+roc(pred_praw, Test$class)
+@
+
+Wspó³czynnik AUC wynosi:
+
+<<echo=FALSE>>=
+auc(pred_praw, Test$class)
+@
+
+<<echo=FALSE>>=
+lda_ost <- vector("list",6)
+names(lda_ost) <- c("tabela", "procent", "czulosc", "precyzja", "roc", "auc")
+lda_ost$tabela <- tab
+lda_ost$procent <- procent(tab)
+lda_ost$czulosc <- czulosc(tab)
+lda_ost$precyzja <- precyzja(tab)
+lda_ost$roc <- list(pred_praw, Test$class)  # potem wystarczy roc(lda$roc[[1]],lda$roc[[2]])
+lda_ost$auc <- auc(pred_praw, Test$class)
+@
+
+\section{Kwadratowa - QDA}
+
+\subsection{Dopasowanie modelu i predykcja}
+
+Dopasujmy model QDA do naszych danych na zbiorze treningowym:
+
+<<>>=
+mod_qda <- qda(class~., data=Train2)
+@
+
+Zróbmy predykcjê na zbiorze testowym:
+
+<<>>=
+pred_klas <- predict(mod_qda, newdata=Test2)$class
+pred_praw <- predict(mod_qda, newdata=Test2)$posterior[,2]
+@
+
+\subsection{Diagnostyka modelu}
+
+Tabela reklasyfikacji na zbiorze testowym wygl±da nastêpuj±co:
+
+<<echo=FALSE>>=
+tab <- tabela(pred_klas, Test2$class)
+tab  
+@
+
+A procent poprawnego dopasowania, czu³o¶æ i precyzja nastêpuj±co:
+
+<<>>=
+procent(tab)
+czulosc(tab)
+precyzja(tab)
+@
+
+No i znów (podobnie jak dla LDA) model nie jest najlepiej dopasowany. Mimo to wyra¼nie widaæ znaczn± poprawê (szczególnie precyzji).
+
+\subsection{Krzywa ROC i wspó³czynnik AUC}
+
+I na koniec wyznaczmy krzyw± ROC:
+
+<<echo=FALSE,fig.align='center',fig.height=6, fig.width=10>>=
+roc(pred_praw, Test2$class)
+@
+
+Wspó³czynnik AUC wynosi:
+
+<<echo=FALSE>>=
+auc(pred_praw, Test2$class)
+@
+
+<<echo=FALSE>>=
+qda_ost <- vector("list",6)
+names(qda_ost) <- c("tabela", "procent", "czulosc", "precyzja", "roc", "auc")
+qda_ost$tabela <- tab
+qda_ost$procent <- procent(tab)
+qda_ost$czulosc <- czulosc(tab)
+qda_ost$precyzja <- precyzja(tab)
+qda_ost$roc <- list(pred_praw, Test2$class) 
+qda_ost$auc <- auc(pred_praw, Test2$class)
+@
+

@@ -1,0 +1,58 @@
+\chapter{Naiwny Klasyfikator Bayesa}
+\thispagestyle{fancy}
+\section{Dopasowanie modelu i predykcja}
+
+Dopasowanie modelu na zbiorze treningowym:
+<<>>=
+bayes <- naiveBayes(class~.,data=Train, laplace=0.2)
+@
+
+Predykcja na zbiorze testowym, klasy i prawdopodobieñstwo przynale¿no¶ci do klasy 1:
+<<>>=
+bayes_pred <- predict(bayes, newdata=Test)
+bayes_prawd <- predict(bayes, newdata=Test, type="raw")[,2]
+
+@
+\section{Diagnostyka modelu}
+Tabela reklasyfikacji na zbiorze testowym wygl±da nastêpuj±co:
+
+<<echo=FALSE>>=
+tab <- tabela(bayes_pred, Test$class)
+tab 
+@
+
+A procent poprawnego dopasowania, czu³o¶æ i precyzja nastêpuj±co:
+
+<<>>=
+procent(tab)
+czulosc(tab)
+precyzja(tab)
+@
+Pomimo wysokiej czu³o¶ci i precyzji, naiwny klasyfikator bayesa ma bardzo ma³y, w porównaniu do innych klasyfikatorów uzytych w tym raporcie, procent poprawnej klasyfikacji. Jednak czu³o¶æ i precyzja s± na bardzo wysokim poziomie, w porównaniu do innych klasyfikatorów!
+\section{Krzywa ROC i wspó³czynnik AUC}
+
+I na koniec wyznaczmy krzyw± ROC:
+
+<<echo=FALSE,fig.align='center',fig.height=6, fig.width=10>>=
+roc(bayes_prawd, Test$class)
+@
+
+
+Wspó³czynnik AUC wynosi:
+
+<<echo=FALSE>>=
+auc(bayes_prawd, Test$class)
+@
+Piêkny wynik!
+
+<<echo=FALSE>>=
+bayes_ost <- vector("list",6)
+names(bayes_ost) <- c("tabela", "procent", "czulosc", "precyzja", "roc", "auc")
+bayes_ost$tabela <- tab
+bayes_ost$procent <- procent(tab)
+bayes_ost$czulosc <- czulosc(tab)
+bayes_ost$precyzja <- precyzja(tab)
+bayes_ost$roc <- list(bayes_prawd, Test$class) 
+bayes_ost$auc <- auc(bayes_prawd, Test$class)
+@
+

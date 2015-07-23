@@ -1,0 +1,165 @@
+\chapter{Metody ³±czenia drzew decyzyjnych}
+\thispagestyle{fancy}
+
+\section{Bagging}
+
+Dopasujmy model opieraj±c siê na baggingu dla drzew decyzyjnych:
+
+<<>>=
+mod_bag <- bagging(class~.,data=Train)
+@
+
+Zróbmy predykcjê:
+
+<<>>=
+predykcja <- predict.bagging(mod_bag,newdata=Test)
+pred_klas <- predykcja$class
+pred_praw <- predykcja$prob[,2]
+@
+
+Popatrzmy na tabelê klasyfikacji na zbiorze testowym:
+
+<<echo=FALSE>>=
+tab <- tabela(pred_klas,Test$class)
+tab
+@
+
+I na procent poprawnego dopasowania, czu³o¶æ i precyzjê:
+
+<<>>=
+procent(tab)
+czulosc(tab)
+precyzja(tab)
+@
+
+Czu³o¶æ jest nienajgorsza. Za to precyzja jest fatalna. Przyjrzyjmy siê jeszcze krzywej ROC i wspó³czynnikowi AUC:
+
+<<echo=FALSE,fig.align='center',fig.height=6, fig.width=10>>=
+roc(pred_praw,Test$class)
+auc(pred_praw,Test$class)
+@
+
+Wygl±da to ca³kiem dobrze.
+
+<<echo=FALSE>>=
+bagging_ost <- vector("list",6)
+names(bagging_ost) <- c("tabela", "procent", "czulosc", "precyzja", "roc", "auc")
+bagging_ost$tabela <- tab
+bagging_ost$procent <- procent(tab)
+bagging_ost$czulosc <- czulosc(tab)
+bagging_ost$precyzja <- precyzja(tab)
+bagging_ost$roc <- list(pred_praw, Test$class) 
+bagging_ost$auc <- auc(pred_praw,Test$class)
+@
+
+\section{Boosting}
+
+Dopasujmy model opieraj±c siê na boostingu dla drzew decyzyjnych:
+
+<<warning=FALSE>>=
+mod_boo <- boosting(class~., data=Train, control = (minsplit = 10),
+                    mfinal=20)
+@
+
+Zróbmy predykcjê na zbiorze testowym:
+
+<<warning=FALSE>>=
+predykcja <- predict.boosting(mod_boo,newdata=Test)
+pred_klas <- predykcja$class
+pred_praw <- predykcja$prob[,2]
+@
+
+I przyjrzyjmy siê tabeli klasyfikacji na zbiorze testowym:
+
+<<echo=FALSE>>=
+tab <- tabela(pred_klas,Test$class)
+tab
+@
+
+Inne wspó³czynniki wygl±daj± nastêpuj±co:
+
+<<>>=
+procent(tab)
+czulosc(tab)
+precyzja(tab)
+@
+
+Nie jest najlepiej...
+
+Spójrzmy jeszcze na krzyw± ROC i wspó³czynnik AUC:
+
+<<echo=FALSE,fig.align='center',fig.height=6, fig.width=10>>=
+roc(pred_praw,Test$class)
+auc(pred_praw,Test$class)
+@
+
+<<echo=FALSE>>=
+boosting_ost <- vector("list",6)
+names(boosting_ost) <- c("tabela", "procent", "czulosc", "precyzja", "roc", "auc")
+boosting_ost$tabela <- tab
+boosting_ost$procent <- procent(tab)
+boosting_ost$czulosc <- czulosc(tab)
+boosting_ost$precyzja <- precyzja(tab)
+boosting_ost$roc <- list(pred_praw, Test$class) 
+boosting_ost$auc <- auc(pred_praw,Test$class)
+@
+
+
+\section{Lasy losowe}
+
+Dopasumy do danych las losowy w nastêpuj±cy sposób:
+
+<<>>=
+mod_las <- randomForest(class~., data=Train)
+@
+
+Zróbmy predykcjê:
+
+<<>>=
+pred_praw <- predict(mod_las,newdata=Test, type="prob")[,2]
+pred_klas <- predict(mod_las,newdata=Test, type="response")
+@
+
+Przyjrzyjmy siê tabeli reklasyfikacji:
+
+<<echo=FALSE>>=
+tab <- tabela(pred_klas, Test$class)
+tab 
+@
+
+Oraz innym wspó³czynnikom:
+
+<<>>=
+procent(tab)
+czulosc(tab)
+precyzja(tab)
+@
+
+Czu³o¶æ jest na dobrym poziomie, natomiast precyzja w dalszym ci±gu jest bardzo z³a...
+
+Zobaczmy jeszcze krzyw± ROC i wspó³czynnik AUC:
+
+<<echo=FALSE,fig.align='center',fig.height=6, fig.width=10>>=
+roc(pred_praw, Test$class)
+auc(pred_praw, Test$class)
+@
+
+Krzywa ROC wygl±da bardzo dobrze.
+
+Na poni¿szym wykresie zobaczmy jeszcze, które zmienne s± najbardziej istotne (te, co znajduj± siê na górze wykresu s± najbardziej istotne).
+
+<<echo=FALSE,fig.align='center',fig.height=6, fig.width=10>>=
+varImpPlot(mod_las)
+@
+
+<<echo=FALSE>>=
+las_ost <- vector("list",6)
+names(las_ost) <- c("tabela", "procent", "czulosc", "precyzja", "roc", "auc")
+las_ost$tabela <- tab
+las_ost$procent <- procent(tab)
+las_ost$czulosc <- czulosc(tab)
+las_ost$precyzja <- precyzja(tab)
+las_ost$roc <- list(pred_praw, Test2$class) 
+las_ost$auc <- auc(pred_praw, Test2$class)
+@
+

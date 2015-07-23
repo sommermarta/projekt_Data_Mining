@@ -1,0 +1,155 @@
+\part*{Zestawienie wyników dla klasyfikatorów u¿ytych do analizy}
+\addcontentsline{toc}{part}{Zestawienie wyników dla klasyfikatorów u¿ytych do analizy}
+\thispagestyle{fancy}
+\chapter{Krzywe ROC}
+\thispagestyle{fancy}
+Wszystkie krzywe ROC dla klasyfikatórw wygl±daj± nastêpuj±co. Najlepiej spisuje siê Naiwny Klasyfikator Bayesa.
+<<echo=FALSE, cache=FALSE>>=
+kolory <- colors()[sample(1:640,6)]
+roc(lda_ost$roc[[1]],lda_ost$roc[[2]], lty=5, lwd=2, main="Porównanie krzywych ROC")
+roc2(qda_ost$roc[[1]],qda_ost$roc[[2]], col=kolory[1],lty=5, lwd=2)
+roc2(tree_ost$roc[[1]],tree_ost$roc[[2]], col=kolory[2],lty=5, lwd=2)
+roc2(logit_ost$roc[[1]],logit_ost$roc[[2]], col=colors()[50],lty=5, lwd=2)
+roc2(las_ost$roc[[1]],las_ost$roc[[2]], col=kolory[4],lty=5, lwd=2)
+roc2(bayes_ost$roc[[1]],bayes_ost$roc[[2]], col=kolory[5],lty=5, lwd=2)
+roc2(svm_ost$roc[[1]],svm_ost$roc[[2]], col=kolory[6],lty=5, lwd=2)
+
+legend(0.6,0.5, 
+       c("LDA","QDA","Drzewo","Logistyczna","Lasy","Bayes", "SVM"),
+      lty=2,
+      lwd=2,
+      col=c("red",kolory[1:2],colors()[50],kolory[4:6]))
+
+
+@
+
+\chapter{Tabela podsumowuj±ca}
+\thispagestyle{fancy}
+
+<<cache=FALSE,echo=FALSE>>=
+
+metody <- c("lda","qda","logit","bayes","knn","svm","tree","bagging",
+            "boosting","las")
+
+cechy <- c("procent","czulosc","precyzja","auc")
+cechy2 <- c("Procent \\footnotemark[1]","Czu³o¶æ","Precyzja","AUC")
+
+il <- length(metody)
+
+proc <- numeric(il)
+czul <- numeric(il)
+prec <- numeric(il)
+auce <- numeric(il)
+
+for(i in 1:il){
+   proc[i] <- formatC(get(paste(c(metody[i],"_ost"), collapse=""))$procent,
+                     digits=2, format="f")
+}
+
+for(i in 1:il){
+   czul[i] <- formatC(get(paste(c(metody[i],"_ost"), collapse=""))$czulosc,
+                     digits=2, format="f")
+}
+
+for(i in 1:il){
+   prec[i] <- formatC(get(paste(c(metody[i],"_ost"), collapse=""))$precyzja,
+                     digits=2, format="f")
+}
+
+
+for(i in 1:il){
+   auce[i] <- formatC(get(paste(c(metody[i],"_ost"), collapse=""))$auc,
+                     digits=2, format="f")
+}
+@
+
+
+\begin{table}[h!]
+\begin{center}
+\begin{tabular}{lrrrr}\toprule
+
+<<echo=FALSE, results='asis',cache=FALSE>>=
+for(i in 1:length(cechy)){
+   if(i==1){
+      cat("\\ &",cechy2[i],"&") 
+   } else{
+      if(i==length(cechy)){
+         cat(paste(cechy2[i],"\\\\ \\toprule \n")) 
+      } else cat(paste(cechy2[i],"&"))
+   }
+}
+
+
+for(i in 1:il){
+   if(i==4){
+      cat("\\midrule \n")
+      cat("\\textcolor{red}{",metody[i],"}&",proc[i],"&",czul[i],"&",prec[i],"&",auce[i],"\\\\ ")
+      cat("\\midrule \n")
+   }  else{
+   cat(metody[i],"&",proc[i],"&",czul[i],"&",prec[i],"&",auce[i],"\\\\ \n")}
+}
+@
+\bottomrule
+\end{tabular}
+\end{center}
+\end{table}
+
+Z powy¿szej tabeli widaæ wyra¼nie, ¿e najlepiej spisuje siê klasyfikator naiwnego Bayesa. Ma on najwy¿sz± precyzjê (i to znacznie wiêksz± ni¿ wszystkie pozosta³e metody!) i najwy¿sz± warto¶æ parametru AUC. Jego czu³o¶æ te¿ nale¿y raczej do tych lepszych. Niestety charakteryzuje siê jednym z najni¿szych procentów poprawnej klasyfikacji. Patrz±c jednak na precyzjê i krzyw± ROC mo¿emy zdecydowanie stwierdziæ, ¿e jest on metod±, która najlepiej stosuje siê do naszych danych. Precyzja jest tu wa¿na g³ównie ze wzglêdu na charakter naszych danch. Mianowicie zale¿y nam przede wszystkim na poprawnym wykryciu wstrz±sów sejsmicznych. Czyli lepiej jest dla nas og³osiæ fa³szywy alarm, ni¿ rzeczywistego trzêsienia nie wykryæ. 
+
+Pozosta³e metody sprawuj± siê niestety nie najlepiej (a niektóre wrêcz fatalnie!).
+
+
+\footnotetext[1]{tzn. procent poprawnej klasyfikacji}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

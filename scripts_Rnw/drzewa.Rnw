@@ -1,0 +1,108 @@
+
+\chapter{Drzewa decyzyjne}
+\thispagestyle{fancy}
+\section{Graficzna prezentacja drzew decyzyjnych}
+
+<<echo=FALSE>>=
+Seismic.tree  <-  rpart(class~.,data=Train,cp=0.0001,minsplit=5)
+@
+\begin{figure}[h!]
+<<echo=FALSE, fig.width=15, fig.height=6>>=
+par(mar=c(0,1,0,1))
+plot(Seismic.tree,branch=0.2)
+@
+\caption{Drzewo decyzyjne u¿ywaj±ce indeksu Giniego.}
+\label{fig:d1}
+\end{figure}
+<<echo=FALSE>>=
+Seismic.tree.ent  <-  rpart(class~.,data=Train,cp=0.0001,minsplit=5,parms=list(split="information"))
+@
+\begin{figure}[h!]
+<<echo=FALSE, fig.width=15, fig.height=6>>=
+plot(Seismic.tree.ent,branch=0.2)
+@
+\caption{Drzewo decyzyjne u¿ywaj±ce entropii.}
+\label{fig:d2}
+\end{figure}
+\section{Dopasowanie modelu i predykcja}
+\paragraph{}Dopasowanie klasyfikacji przy pomocy drzewa decyzyjnego u¿ywaj±cego indeksu Giniego ma syntax jak poni¿ej:
+<<eval=FALSE>>=
+Seismic.tree  <-  rpart(class~.,data=Train,cp=0.0001,minsplit=5)
+@
+\paragraph{}Graficzne przedstawienie drzewa za¶ ma postaæ \ref{fig:d1}.
+\paragraph{}Dopasowanie klasyfikacji przy pomocy drzewa decyzyjnego u¿ywaj±cego entropii ma syntax jak poni¿ej:
+<<eval=FALSE>>=
+Seismic.tree.ent  <-  rpart(class~.,data=Train,cp=0.0001,minsplit=5,parms=list(split="information"))
+@
+\paragraph{}Z kolei przedstawienie tego drzewa ma postaæ \ref{fig:d2}.
+
+\subsection{Wybór drzewa optymalnego}
+Wybieramy drzewo optymalne w oparciu o kryterium kosztu- z³o¿ono¶ci, stosuj±c regu³ê \texttt{1SE}.
+<<echo=FALSE>>=
+par(omi=c(0.6,0.6,0.6,0.6))
+plotcp(Seismic.tree)
+@
+\paragraph{}"A good choice of cp for pruning is often the leftmost value for which the mean lies below the horizontal line." - w takim wypadku nie trzeba przycinaæ drzewa.
+
+Wykorzystajmy jeszcze funkcjê \texttt{tune.rpart()} do wyliczenia optymalnego argumentu \texttt{minsplit}, który wyniós³ 12.
+<<minsplit>>=
+obj <- tune.rpart(class~., data = Train, minsplit = c(1:15))
+summary(obj)
+@
+\begin{figure}[h!]
+<<echo=FALSE, dependson='minsplit'>>=
+plot(obj, main="")
+@
+\caption{Performance of rpart.wrapper !}
+\end{figure}
+Widaæ to równie¿ na wykresie Performance of rpart.wrapper !, dla którego minimum jest osi±gane w punkcie 12. Zatem najoptymalniejszy model dla drzewa klasyfikacyjnego to:
+<<>>=
+Seismic.tree  <-  rpart(class~.,data=Train,cp=0.0001,minsplit=12)
+@
+\subsection{Predykcja dla optymalnego drzewa}
+\paragraph{}Predykcja dla tak dopasowanego drzewa wygl±da nastêpuj±co:
+<<>>=
+pred.tree.class <- predict(Seismic.tree, newdata=Test, type="class")
+pred.tree.prob <- predict(Seismic.tree, newdata=Test, type="prob")[,2]
+@
+
+\section{Diagnostyka modelu}
+Tabela reklasyfikacji na zbiorze testowym wygl±da nastêpuj±co:
+
+<<echo=FALSE>>=
+tab <- tabela(pred.tree.class, Test$class)
+tab 
+@
+
+A procent poprawnego dopasowania, czu³o¶æ i precyzja nastêpuj±co:
+
+<<>>=
+procent(tab)
+czulosc(tab)
+precyzja(tab)
+@
+Pomimo w miarê dobrego poziomu procentowej poprawno¶ci klasyfikacji i do¶æ du¿ej czu³o¶ci w stosunku to poprzednich klasyfikatorów, optymalne drzewo regresyjne ma bardzo s³ab± precyzjê.
+\section{Krzywa ROC i wspó³czynnik AUC}
+
+I na koniec wyznaczmy krzyw± ROC:
+
+<<echo=FALSE,fig.align='center',fig.height=6, fig.width=10, dependson=c(-2,-3)>>=
+roc(pred.tree.prob, Test$class)
+@
+
+Wspó³czynnik AUC wynosi:
+
+<<echo=FALSE,dependson=c(-3,-4)>>=
+auc(pred.tree.prob, Test$class)
+@
+
+<<echo=FALSE>>=
+tree_ost <- vector("list",6)
+names(tree_ost) <- c("tabela", "procent", "czulosc", "precyzja", "roc", "auc")
+tree_ost$tabela <- tab
+tree_ost$procent <- procent(tab)
+tree_ost$czulosc <- czulosc(tab)
+tree_ost$precyzja <- precyzja(tab)
+tree_ost$roc <- list(pred.tree.prob, Test$class)  
+tree_ost$auc <- auc(pred.tree.prob, Test$class)
+@

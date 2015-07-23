@@ -1,0 +1,39 @@
+\chapter{Metoda k Najbli¿szych S±siadóW}
+\thispagestyle{fancy}
+\section{Dopasowanie modelu i predykcja}
+
+Dopasujmy metodê k Najbli¿szych S±siadów do naszych danych na zbiorze treningowym:
+
+<<>>=
+sei_knn <- knn(Train2[,-14], Test2[,-14],cl=Train$class, k=2)
+@
+
+\section{Diagnostyka modelu}
+
+Tabela reklasyfikacji na zbiorze testowym wygl±da nastêpuj±co:
+<<>>=
+(tab <- tabela(knn(Train2[,-14], Test2[,-14],cl=Train$class, k=2), Test2$class))
+@
+
+A procent poprawnego dopasowania, czu³o¶æ i precyzja nastêpuj±co:
+
+<<>>=
+procent(tab)
+czulosc(tab)
+precyzja(tab)
+@
+
+Pomimo do¶æ dobrej poprawnosci procentowej dopasowania, czulosc i precyzja dopasowania sa na bardzo niskim poziomie.
+
+
+
+<<echo=FALSE>>=
+knn_ost <- vector("list",6)
+names(knn_ost) <- c("tabela", "procent", "czulosc", "precyzja", "roc", "auc")
+knn_ost$tabela <- tab
+knn_ost$procent <- procent(tab)
+knn_ost$czulosc <- czulosc(tab)
+knn_ost$precyzja <- precyzja(tab)
+knn_ost$roc <- "-"
+knn_ost$auc <- "-"
+@

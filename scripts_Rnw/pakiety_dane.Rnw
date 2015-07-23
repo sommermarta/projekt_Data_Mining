@@ -1,0 +1,68 @@
+<<echo=FALSE,warning=FALSE, cache=FALSE>>=
+
+library("foreign")
+library("MASS")
+library("rpart")
+library("klaR")
+library("glmnet")
+library("ROCR")
+library("e1071")
+library("adabag")
+#install.packages("caret")
+#install.packages("RcppEigen")
+library("RcppEigen")
+library("caret")
+library("randomForest")
+#install.packages(c("randomForest", "adabag"))
+if(!require(parallel)) { 
+install.packages("parallel"); require(parallel)}
+if(!require(e1071)) { 
+install.packages("e1071"); require(e1071)}
+if(!require(class)) { 
+install.packages("class"); require(class)}
+
+se <- read.arff("http://archive.ics.uci.edu/ml/machine-learning-databases/00266/seismic-bumps.arff")
+
+se <- se[,-c(14:16)]
+se_wyb <- se[,-c(9,15)]
+
+# troche funkcji:
+
+tabela <- function(predykcja_klasy, klasy_prawdziwe){
+   table(predykcja_klasy, klasy_prawdziwe)
+}
+
+procent <- function(t){
+   100*sum(diag(t))/sum(t)
+}
+
+czulosc <- function(t){
+   if(sum(t[2,])==0) return(0) else t[2,2]/(sum(t[2,]))
+}
+
+precyzja <- function(t){
+   if(sum(t[,2])==0) return(0) else t[2,2]/sum(t[,2])
+}
+
+roc <- function(pred_prawdopod, prawdziwe_klasy,...){
+   pred <- prediction(pred_prawdopod, prawdziwe_klasy)
+   perf <- performance(pred, measure="tpr",x.measure="fpr")
+   plot(perf,col="red",...)
+   abline(0,1)
+   lines(c(0.5,0.5),c(-0.1,1.1),lty=2,col="green")
+}
+
+auc <- function(pred_prawdopod, prawdziwe_klasy){
+   pred <- prediction(pred_prawdopod, prawdziwe_klasy)
+   performance(pred, "auc")@y.values[[1]] 
+}
+
+
+roc2 <- function(pred_prawdopod, prawdziwe_klasy,...){
+   pred <- prediction(pred_prawdopod, prawdziwe_klasy)
+   perf <- performance(pred, measure="tpr",x.measure="fpr")
+   plot(perf,...,add=TRUE)
+}
+
+@
+

@@ -1,0 +1,62 @@
+\chapter*{Od autorów}
+\thispagestyle{fancy}
+\addcontentsline{toc}{chapter}{Od autorów}
+\section*{Motywacja}
+\addcontentsline{toc}{section}{Motywacja}
+Górnictwo od zawsze by³o powi±zane z niebezpieczeñstwami zwanymi zagro¿eniami górniczymi. Szczególnym przypadkiem takich zagro¿eñ s± wstrz±sy sejsmiczne, czêsto nawiedzaj±ce kopalnie g³êbinowe. Wstrz±sy sejsmiczne s± najtrudniejszym do wykrycia zagro¿eniem naturalnym, co czyni je pod tym wzglêdem porównywalnymi do trzêsieñ ziemi. Coraz wiêkszy poziom zaawansowania systemów monitorowania wstrz±sów i akustyki wstrz±sów pozwala nam bardziej dog³êbnie zrozumieæ naturê ruchów tektonicznych i okre¶liæ metody przewidywania wstrz±sów. 
+\paragraph{}Dok³adno¶æ takich metod pozostawia jednak jak dot±d wiele do ¿yczenia. Niedostateczna precyzja metod statystycznych spowodowana jest z³o¿ono¶ci± procesów tektonicznych, jak równie¿ du¿± rozbie¿no¶ci± miêdzy liczb± wstrz±sów o niskiej magnitudzie a liczb± wstrz±sów o wysokiej magnitudzie (np. wstrz±sów o energii przekraczaj±cej $10^4 J$). W rezultacie istniej±ce metody statystyczne bywaj± niewystarczaj±ce do dok³adnego przewidywania wstrz±sów.
+\paragraph{}Z uwagi na realne zagro¿enie ¿ycia spowodowane wstrz±sami sejsmicznymi istotne jest poszukiwanie nowych sposobów lepszego wykrywania niebezpieczeñstw - miêdzy innymi za pomoc± metod uczenia maszynowego. Uczenie maszynowe jest w sejsmologii dziedzin± wci±¿ rozwijaj±c± siê, gdy¿ obecnie stosowane metody nie s± do¶æ czu³e i nie pozwalaj± na przewidywanie zagro¿eñ sejsmicznych z wystarczaj±c± dok³adno¶ci±.
+\paragraph{}
+Precyzyjna prognoza wzrostu aktywno¶ci tektonicznej jest niezwykle istotna w praktycznym zapobieganiu zagro¿eniom. Dlatego w³a¶nie postanowili¶my przyjrzeæ siê zestawowi danych dotycz±cych prawdziwych problemów sejsmologicznych, z którymi zmaga siê wspó³czesna statystyka stosowana.
+\newpage
+\section*{Opis zmiennych w zbiorze}
+\addcontentsline{toc}{section}{Opis zmiennych w zbiorze}
+Zbiór wykorzystany w analizie cechuje siê niezbalansowanym rozk³adem przypadków wystêpowania i braku wystêpowania cechy, dla której ma byæ zadana predykcja. Na blisko ponad $2000$ przypadków tylko $170$ reprezentuje klasê $1$. Bêdzie to g³ówny problem, przewijaj±cy siê przez ca³y proces analizy danych.
+
+\begin{table}[h]
+\label{tab:opis2}
+\caption{Opis zmiennych ze zbioru \texttt{Seismic-bumps}.}
+\begin{center}
+\begin{tabular}{lp{10cm}}
+\toprule%
+Zmienna  &  Opis \\ \toprule%
+seismic  &  wynik oceny zagro¿enia sejsmicznego w czasie danej zmiany oszacowanego metod± pomiarów sejsmicznych (a - brak zagro¿enia, b - niski poziom zagro¿enia, c - wysoki poziom zagro¿enia, d - niebezpieczeñstwo wstrz±su)   \\ 
+seismoacoustic  &  wynik oceny zagro¿enia sejsmicznego w czasie danej zmiany oszacowanego metod± pomiarów sejsmoakustycznych   \\ 
+shift & informacja na temat typu zmiany, (W - ekipa wydobywaj±ca wêgiel, N - zmiana przygotowawcza) \\
+genergy & poziom energii sejsmicznej zarejestrowany przez najbardziej aktywny (GMax) spo¶ród geofonów monitoruj±cych tunel \\
+gpuls & liczba drgañ zarejestrowana\footnotemark[1] przez Gmax \\
+gdenergy & odchylenie poziomu energii zarejestrowanej\footnotemark[1] przez Gmax od ¶redniej zarejestrowanej podczas ostatnich 8 zmian \\
+gdpuls & odchylenie liczby drgañ zarejestrowanej\footnotemark[1] przez Gmax od ¶redniej zarejestrowanej podczas ostatnich 8 zmian \\
+ghazard & wynik oceny zmiany zagro¿enia sejsmicznego na zmianie oszacowany metod± \texttt{seismoacoustic} tylko przez geofonu Gmax \\
+nbumps & liczba t±pniêæ sejsmicznych\footnotemark[1] \\ 
+nbumps2 & liczba t±pniêæ sejsmicznych\footnotemark[1] w zakresie $[10^2,10^{3})$  \\
+nbumps3 & liczba t±pniêæ sejsmicznych\footnotemark[1] w zakresie $[10^3,10^{4})$  \\
+nbumps4 & liczba t±pniêæ sejsmicznych\footnotemark[1] w zakresie $[10^4,10^{5})$  \\
+nbumps5 & liczba t±pniêæ sejsmicznych\footnotemark[1] w zakresie $[10^5,10^{6})$  \\
+nbumps6 & liczba t±pniêæ sejsmicznych\footnotemark[1] w zakresie $[10^6,10^{7})$  \\
+nbumps7 & liczba t±pniêæ sejsmicznych\footnotemark[1] w zakresie $[10^7,10^{8})$ \\
+nbumps89 & liczba t±pniêæ sejsmicznych\footnotemark[1] w zakresie $[10^8,10^{10})$  \\
+energy & ca³kowita energia t±pniêæ sejsmicznych\footnotemark[1] \\
+maxenergy & maksymalna energia t±pniêæ sejsmicznych\footnotemark[1] \\
+class & zmienna decyzyjna -- czy na kolejnej zmianie wyst±pi silne t±pniêcie  \\ \bottomrule
+\end{tabular}
+
+<<>>=
+
+@
+
+\end{center}
+\end{table}
+\footnotetext[1]{Zarejestrowana podczas poprzedniej zmiany}
+
+
+\newpage
+\section*{Szczegó³y techniczne pracy}
+Analiza zosta³a przeprowadzona w pakiecie statystycznym R, wersja 3.1.0. Tekst raportu zosta³ z³o¿ony przy pomocy pakietu knitr, który umo¿liwia za³±czanie wyników i rezultatów z funkcji R w programie do sk³adu publikacji LaTeX. Projekt zosta³ przeprowadzony przy wsparciu systemu kontroli wersji Git, który czuwa³ nad integracj± plików i optymalizacj± pracy zespo³owej. Korzy¶æ z zastosowania takiego rozwi±zania techonologicznego by³a taka, ¿e w dwie osoby mogli¶my wspólnie pracowaæ na wielu plikach \textttt{.Rnw} jednocze¶nie bez konfliktów i z mo¿lisie szybkim przekazem plików. Do po³±czenia pakietu R z systemem kontroli wersji Git wykorzystano pakiet \texttt{devtools}, wspomagaj±cy integracjê pakietu R z GitHubem (\href{https://github.com}{https://github.com}). Ostatecznie dziêki systemowi kontroli wersji mo¿na ¶ledzic postêpy w pracach i zaanga¿owanie poszczególnych osób w sukces projektu. Poni¿ej screen z aktywno¶ci przy obecnym projekcie:
+\begin{figure}[h!]
+\includegraphics[width=\textwidth]{aktywnosc.png}
+\end{figure}
+\paragraph{} Repozytorium, w którym dostêpne s± wszystkie pliki jest dostêpne pod adresem:  \href{https://github.com/MarcinKosinski/DM1}{https://github.com/MarcinKosinski/DM1}.
+\addcontentsline{toc}{section}{Szczegó³y techniczne pracy}
+
+
