@@ -19,8 +19,6 @@ cache
 *.synctex.gz
 *.lof
 *.lot
-*.pdf
-
 # Data sets and some trashy-files
 .csv
 .txt
@@ -31,11 +29,7 @@ DANE.sas
 .toc
 .lof
 .lot
-.pdf
-
-
-
-*.csv
+.csv
 *.txt
 *.sas7bdat
 *.csv.gz
